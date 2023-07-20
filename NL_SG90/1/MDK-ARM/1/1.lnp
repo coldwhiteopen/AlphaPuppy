@@ -1,0 +1,33 @@
+--cpu Cortex-M4.fp
+"1\startup_stm32wb15xx_cm4.o"
+"1\main.o"
+"1\gpio.o"
+"1\tim.o"
+"1\usart.o"
+"1\stm32wbxx_it.o"
+"1\stm32wbxx_hal_msp.o"
+"1\stm32wbxx_hal_tim.o"
+"1\stm32wbxx_hal_tim_ex.o"
+"1\stm32wbxx_hal_rcc.o"
+"1\stm32wbxx_ll_rcc.o"
+"1\stm32wbxx_hal_rcc_ex.o"
+"1\stm32wbxx_hal_flash.o"
+"1\stm32wbxx_hal_flash_ex.o"
+"1\stm32wbxx_hal_gpio.o"
+"1\stm32wbxx_hal_hsem.o"
+"1\stm32wbxx_hal_dma.o"
+"1\stm32wbxx_hal_dma_ex.o"
+"1\stm32wbxx_hal_pwr.o"
+"1\stm32wbxx_hal_pwr_ex.o"
+"1\stm32wbxx_hal_cortex.o"
+"1\stm32wbxx_hal.o"
+"1\stm32wbxx_hal_exti.o"
+"1\stm32wbxx_hal_uart.o"
+"1\stm32wbxx_hal_uart_ex.o"
+"1\system_stm32wbxx.o"
+--strict --scatter "stm32wb15xx_flash_cm4.sct"
+
+--diag_suppress L6314W
+--diag_suppress 1296 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "1.map" -o 1\1.axf
