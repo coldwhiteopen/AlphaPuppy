@@ -1,64 +1,40 @@
-## AlphaZero-Gomoku
-This is an implementation of the AlphaZero algorithm for playing the simple board game Gomoku (also called Gobang or Five in a Row) from pure self-play training. The game Gomoku is much simpler than Go or chess, so that we can focus on the training scheme of AlphaZero and obtain a pretty good AI model on a single PC in a few hours. 
-
-References:  
-1. AlphaZero: Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm
-2. AlphaGo Zero: Mastering the game of Go without human knowledge
-
-### Update 2018.2.24: supports training with TensorFlow!
-### Update 2018.1.17: supports training with PyTorch!
-
-### Example Games Between Trained Models
-- Each move with 400 MCTS playouts:  
-![playout400](https://raw.githubusercontent.com/junxiaosong/AlphaZero_Gomoku/master/playout400.gif)
-
-### Requirements
-To play with the trained AI models, only need:
-- Python >= 2.7
-- Numpy >= 1.11
-
-To train the AI model from scratch, further need, either:
-- Theano >= 0.7 and Lasagne >= 0.1      
-or
-- PyTorch >= 0.2.0    
-or
-- TensorFlow
-
-**PS**: if your Theano's version > 0.7, please follow this [issue](https://github.com/aigamedev/scikit-neuralnetwork/issues/235) to install Lasagne,  
-otherwise, force pip to downgrade Theano to 0.7 ``pip install --upgrade theano==0.7.0``
-
-If you would like to train the model using other DL frameworks, you only need to rewrite policy_value_net.py.
-
-### Getting Started
-To play with provided models, run the following script from the directory:  
-```
-python human_play.py  
-```
-You may modify human_play.py to try different provided models or the pure MCTS.
-
-To train the AI model from scratch, with Theano and Lasagne, directly run:   
-```
-python train.py
-```
-With PyTorch or TensorFlow, first modify the file [train.py](https://github.com/junxiaosong/AlphaZero_Gomoku/blob/master/train.py), i.e., comment the line
-```
-from policy_value_net import PolicyValueNet  # Theano and Lasagne
-```
-and uncomment the line 
-```
-# from policy_value_net_pytorch import PolicyValueNet  # Pytorch
-or
-# from policy_value_net_tensorflow import PolicyValueNet # Tensorflow
-```
-and then execute: ``python train.py``  (To use GPU in PyTorch, set ``use_gpu=True`` and use ``return loss.item(), entropy.item()`` in function train_step in policy_value_net_pytorch.py if your pytorch version is greater than 0.5)
-
-The models (best_policy.model and current_policy.model) will be saved every a few updates (default 50).  
-
-**Note:** the 4 provided models were trained using Theano/Lasagne, to use them with PyTorch, please refer to [issue 5](https://github.com/junxiaosong/AlphaZero_Gomoku/issues/5).
-
-**Tips for training:**
-1. It is good to start with a 6 * 6 board and 4 in a row. For this case, we may obtain a reasonably good model within 500~1000 self-play games in about 2 hours.
-2. For the case of 8 * 8 board and 5 in a row, it may need 2000~3000 self-play games to get a good model, and it may take about 2 days on a single PC.
-
-### Further reading
-My article describing some details about the implementation in Chinese: [https://zhuanlan.zhihu.com/p/32089487](https://zhuanlan.zhihu.com/p/32089487) 
+## AlphaPuppy五子棋机器人
+### 主要技术特点
+* 五子棋的决策算法部分采用强化学习完成，参考开源的仿照谷歌
+AlphaGo 和 AlphaGo Zero 所编写的简化版代码。通过对简化为 7x7 大小的棋
+盘进行强化学习训练，不断优化策略价值函数和决策的熵，可得到一个五子
+棋能力较强的 AI。
+* 机械臂部分采用市面上造价较为昂贵的 mirobot 机械臂进行棋盘标定以
+及完成取子落子运动，mirobot 作为由电机驱动的机械臂，精度较高，并且
+可以使用 python 调包后的相关代码进行控制，可以确保落子位置的准确。
+* 摄像部分采用较容易购买且成本低廉的普通 USB 摄像头。该摄像头可以
+满足清晰拍摄整个棋盘并将图像实时传送给处理器的需要。
+* 棋子输送部分采用由 stm32wb15cc 控制的舵机，结合小组成员自行设计、
+建模、打印的滑道、棋子筒、挡板、连杆，全自动输送棋子至指定位置，以
+供机械臂取用。
+### 关键性能指标
+* 机械臂部分采用 mirobot 机械臂，精度较高，只需事先准确完成对棋盘
+所有落子点位的标定，就可以实现机械臂精准落子，若棋盘和机械臂相对位
+置与标定时相比没有发生改变，那么落子位置的误差可以忽略不计。
+* USB 摄像头拍摄帧率约为 22 帧率每秒。设定每 10 帧处理一次图像，将
+2
+实物图像转化为系统可识别的形式，标出黑白棋子轮廓。
+* 棋子输送部分由 SG90 舵机转动来控制挡板进往复运动，设定 SG90 舵机
+转动范围为 120 度，舵机实际转动范围约为 90 度。运动间隔为挡板拉出 9
+秒后进行推进，推进 8.5 秒再次拉出。
+* 经过近 50 次计算机仿真及实物测试，机器人执黑先行可保持不败，平均
+落子思考时间为 1.15 秒，单次运行 30 分钟以内均可保持稳定。超过 30 分钟
+由于 SG90 舵机过热会导致棋子输送不稳定。
+### 主要创新点
+* 采用强化学习在简化的 8x8 棋盘上进行训练，经过多次尝试，机器人
+执黑先行可保持不败，并且表现出极强的侵略性，在大多数对局中以
+取胜告终。
+* 将高精度机器人 mirobot 用于五子棋机器人的机械臂部分，有效发挥
+其精度高、标定准、可持续工作时间长、移动稳定等特点。
+* 采用腐蚀和膨胀操作，以保留面积相对较大的棋子像素块。使用
+findContours 函数找到图像中的所有轮廓，并获取轮廓的几何中心点。
+对所有中心点进行与棋盘相同的透视校正变换，以获得棋子的坐标。
+可以相当准确地获得棋子的位置并检验落子是否合规。
+* 设计、建模、打印棋盘输送系统所需要的滑道、棋子筒、挡板，并经
+过合理组装将舵机转动转化为挡板平动，实现用 stm32wb15cc 控制棋
+子输送模块稳定送子。
